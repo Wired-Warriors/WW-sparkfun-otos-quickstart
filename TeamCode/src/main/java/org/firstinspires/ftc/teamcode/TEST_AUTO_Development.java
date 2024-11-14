@@ -76,8 +76,10 @@ public class TEST_AUTO_Development extends LinearOpMode {
     public double txLimelight;
     public double tyLimelight;
 
-    //TODO *********** Set the starting pose for the robot based on the alliance start position, X and Y in INCHES from the center of the field, heading in RADIANS
-    Pose2d beginPose = new Pose2d(30, 30, Math.PI/2);
+    //TODO *********** Set the starting pose for the robot based on the alliance start position,
+    // X and Y in INCHES from the center of the field, heading in RADIANS (or convert DEGREES to
+    // RADIANS by multiplying the value in DEGREES by Math.PI/180
+    Pose2d beginPose = new Pose2d(30, 30, 90 * Math.PI/180);
 
     @Override
     public void runOpMode() {
@@ -90,7 +92,7 @@ public class TEST_AUTO_Development extends LinearOpMode {
             limelight.pipelineSwitch(0);
         }
 
-        //Instantiate the roadrunner mechanum drive (via the OTOS localizer)
+        //Instantiate the roadrunner mecanum drive (via the OTOS localizer)
         SparkFunOTOSDrive drive = new SparkFunOTOSDrive(hardwareMap, beginPose);
 
 
@@ -139,4 +141,5 @@ public class TEST_AUTO_Development extends LinearOpMode {
         limelight.pipelineSwitch(0); // Set a default defined pipeline
         limelight.start(); // This tells Limelight to start looking!
     }
+
 }
