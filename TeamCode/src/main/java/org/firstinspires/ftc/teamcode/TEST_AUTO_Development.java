@@ -62,7 +62,7 @@ import java.lang.Math;
  *
  */
 @Autonomous(name="TEST_AUTO_Development", group="AUTO")
-@Disabled
+//@Disabled
 public class TEST_AUTO_Development extends LinearOpMode {
 
     // Declare OpMode members.
@@ -79,11 +79,13 @@ public class TEST_AUTO_Development extends LinearOpMode {
     //TODO *********** Set the starting pose for the robot based on the alliance start position,
     // X and Y in INCHES from the center of the field, heading in RADIANS (or convert DEGREES to
     // RADIANS by multiplying the value in DEGREES by Math.PI/180
-    Pose2d beginPose = new Pose2d(30, 30, 90 * Math.PI/180);
+    Pose2d beginPose = new Pose2d(0, 0, 0 * Math.PI/180);
 
     @Override
     public void runOpMode() {
         initSensors();
+        otos = hardwareMap.get(SparkFunOTOS.class, "sensor_otos");
+
         // Set initial limelight pipeline for alliance color: 0=red, 1=blue, 2=yellow
         if (colorAlliance == "BLUE") {
             limelight.pipelineSwitch(1);
@@ -94,7 +96,6 @@ public class TEST_AUTO_Development extends LinearOpMode {
 
         //Instantiate the roadrunner mecanum drive (via the OTOS localizer)
         SparkFunOTOSDrive drive = new SparkFunOTOSDrive(hardwareMap, beginPose);
-
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -107,7 +108,7 @@ public class TEST_AUTO_Development extends LinearOpMode {
         //Create the first drive path
         Actions.runBlocking(
                 drive.actionBuilder(beginPose)
-                        .splineTo(new Vector2d(60, 60), Math.PI / 2)
+                        .splineTo(new Vector2d(30, 30), Math.PI / 2)
                         .splineTo(new Vector2d(0, 60), Math.PI)
                         .build());
 
