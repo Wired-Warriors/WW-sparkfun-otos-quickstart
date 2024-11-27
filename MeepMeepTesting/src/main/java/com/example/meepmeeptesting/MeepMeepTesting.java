@@ -17,7 +17,7 @@ public class MeepMeepTesting {
                 .build();
 
 
-        myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(38.5, 62.69, -90*Math.PI/180))
+        myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(14, -62.69, 90*Math.PI/180))
 //                .lineToX(30)
 //                .turn(Math.toRadians(90))
 //                .lineToY(30)
@@ -26,10 +26,23 @@ public class MeepMeepTesting {
 //                .turn(Math.toRadians(90))
 //                .lineToY(0)
 //                .turn(Math.toRadians(90))
-                .splineTo(new Vector2d(63.75, 63.75), Math.PI/4)
-                //.splineTo(new Vector2d(60, 0), Math.PI)
+                //.splineTo(new Vector2d(63.75, 63.75), Math.PI/4)
+                .splineTo(new Vector2d(0, -40), 90*Math.PI/180)
+                                .waitSeconds(2)
+                .splineTo(new Vector2d(-48, -38), 90*Math.PI/180)
+                                .waitSeconds(2)
+                .splineTo(new Vector2d(-54, -54), -135*Math.PI/180)
+                                .waitSeconds(2)
+                .splineTo(new Vector2d(-57.5, -38), 90*Math.PI/180)
+                                .waitSeconds(2)
+                .splineTo(new Vector2d(-54, -54), -135*Math.PI/180)
+                                .waitSeconds(2)
+                .splineTo(new Vector2d(-58, -23), 180*Math.PI/180)
+                                .waitSeconds(2)
+                .splineTo(new Vector2d(-54, -54), -135*Math.PI/180)
+                .waitSeconds(2)
                        // .lineToX(46.75)
-                        .splineToConstantHeading(new Vector2d(-63.75,63.75 ), 0)
+                        //.splineToConstantHeading(new Vector2d(-63.75,63.75 ), 0)
                 .build());
 
         meepMeep.setBackground(MeepMeep.Background.FIELD_INTO_THE_DEEP_OFFICIAL)
