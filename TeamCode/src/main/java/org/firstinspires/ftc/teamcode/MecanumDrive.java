@@ -53,6 +53,7 @@ import java.util.List;
 
 @Config
 public class MecanumDrive {
+
     public static class Params {
         // IMU orientation
         // TODO: fill in these values based on
@@ -129,6 +130,7 @@ public class MecanumDrive {
 
     public class DriveLocalizer implements Localizer {
         public final Encoder leftFront, leftBack, rightBack, rightFront;
+
         public final IMU imu;
 
         private double lastLeftFrontPos, lastLeftBackPos, lastRightBackPos, lastRightFrontPos;
