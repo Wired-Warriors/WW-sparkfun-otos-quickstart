@@ -73,7 +73,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * THIS MODE IS CONFIGURED FOR PANCAKE, NOT WAFFLES
  *
  */
-@Autonomous(name="TEST_AUTO_Development", group="AUTO")
+@Autonomous(name="TEST_AUTO_Development Actions", group="AUTO")
 //@Disabled
 public class TEST_Auto_Dev_Actions extends LinearOpMode {
 
@@ -124,7 +124,7 @@ public class TEST_Auto_Dev_Actions extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        initDevices();
+
         int targetPos;
         double maxWheelPower;
         double COUNTS_PER_DEGREE;
@@ -149,6 +149,8 @@ public class TEST_Auto_Dev_Actions extends LinearOpMode {
         ColorSensor_ColorSensor = hardwareMap.get(ColorSensor.class, "Color Sensor");
         ColorSensor_DistanceSensor = hardwareMap.get(DistanceSensor.class, "Color Sensor");
         otos = hardwareMap.get(SparkFunOTOS.class, "otos");
+
+        initDevices(); // Initialize all motors, servos, sensors
 
         //Settings for the lift arm
         COUNTS_PER_MOTOR_REV = 28;
