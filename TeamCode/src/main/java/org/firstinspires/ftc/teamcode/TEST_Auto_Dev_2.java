@@ -183,24 +183,24 @@ public class TEST_Auto_Dev_2 extends LinearOpMode {
         }
 
         SparkFunOTOSDrive drive = new SparkFunOTOSDrive(hardwareMap, beginPose);
-        Trajectory myTrajectory = drive.actionBuilder(new Pose2d(),beginPose)
-                .splineTo(new Vector2d(-54, -54), -135*Math.PI/180)
-                        .waitSeconds(2)
-                        .splineTo(new Vector2d(-51, -38), 90*Math.PI/180)
-                        .waitSeconds(2)
-                        .splineTo(new Vector2d(-54, -54), -135*Math.PI/180)
-                        .waitSeconds(2)
-                        .splineTo(new Vector2d(-60.5, -38), 90*Math.PI/180)
-                        .waitSeconds(2)
-                        .splineTo(new Vector2d(-54, -54), -135*Math.PI/180)
-                        .waitSeconds(2)
-                        .splineTo(new Vector2d(-51,-38),90*Math.PI/180)
-                        .splineTo(new Vector2d(-60.5,-7),90*Math.PI/180)
-                        .lineToY(-55)
-                        .build());
+//        Trajectory myTrajectory = drive.actionBuilder(new Pose2d(),beginPose)
+//                .splineTo(new Vector2d(-54, -54), -135*Math.PI/180)
+//                        .waitSeconds(2)
+//                        .splineTo(new Vector2d(-51, -38), 90*Math.PI/180)
+//                        .waitSeconds(2)
+//                        .splineTo(new Vector2d(-54, -54), -135*Math.PI/180)
+//                        .waitSeconds(2)
+//                        .splineTo(new Vector2d(-60.5, -38), 90*Math.PI/180)
+//                        .waitSeconds(2)
+//                        .splineTo(new Vector2d(-54, -54), -135*Math.PI/180)
+//                        .waitSeconds(2)
+//                        .splineTo(new Vector2d(-51,-38),90*Math.PI/180)
+//                        .splineTo(new Vector2d(-60.5,-7),90*Math.PI/180)
+//                        .lineToY(-55)
+//                        .build());
 
         //Instantiate the roadrunner mecanum drive (via the OTOS localizer)
-        SparkFunOTOSDrive drive = new SparkFunOTOSDrive(hardwareMap, beginPose);
+       // SparkFunOTOSDrive drive = new SparkFunOTOSDrive(hardwareMap, beginPose);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -211,7 +211,7 @@ public class TEST_Auto_Dev_2 extends LinearOpMode {
         waitForStart();
         if(isStopRequested()) return;
 
-        drive.actionBuilder(myTrajectory);
+        // drive.actionBuilder(myTrajectory);
         // Target position, in absolute position - encoder ticks
         targetPos = 0;
         targetPos_Extender = 0;
