@@ -38,6 +38,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -68,7 +69,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  *
  */
 @Autonomous(name="TEST_AUTO_Development", group="AUTO")
-//@Disabled
+@Disabled
 public class TEST_Auto_Dev_Backup extends LinearOpMode {
 
     // Declare OpMode members.

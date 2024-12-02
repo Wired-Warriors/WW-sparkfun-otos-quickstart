@@ -29,15 +29,13 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import android.graphics.Color;
-
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.Trajectory;
-import com.acmerobotics.roadrunner.Vector2d;
+import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -50,13 +48,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.LED;
-import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
-import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.sun.source.tree.CompilationUnitTree;
 
-import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 
@@ -70,12 +64,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  *
  * All of the drive configuration is done via MecanumDrive.java, you do not have to manage that here.
  *
- * THIS MODE IS CONFIGURED FOR PANCAKE, NOT WAFFLES
+ * THIS MODE IS CONFIGURED FOR WAFFLES, NOT PANCAKE
  *
  */
-@Autonomous(name="TEST_AUTO_Development Actions", group="AUTO")
+@Autonomous(name="AUTO-BLUE-1", group="AUTO", preselectTeleOp = "ManualOPBlueAllianceLightIntake (Blocks to Java)")
 //@Disabled
-public class TEST_Auto_Dev_Actions extends LinearOpMode {
+public class AUTO_BLUE_1 extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
@@ -115,7 +109,19 @@ public class TEST_Auto_Dev_Actions extends LinearOpMode {
     double gainP;
     double motorPowerMAX;
     double powerIntake = 0;
-
+    public int targetPos;
+    //int targetPos;
+    double maxWheelPower;
+    double COUNTS_PER_DEGREE;
+    int COUNTS_PER_MOTOR_REV;
+    int GEAR_REDUCTION;
+    int COUNTS_PER_GEAR_REV;
+    int currentPos_Extender;
+    ElapsedTime intakeTimer;
+    int targetPos_Extender;
+    int targetPos_Wrist;
+    int targetPos_Hanger;
+    double velocityArmLift;
 
     //TODO *********** Set the starting pose for the robot based on the alliance start position,
     // X and Y in INCHES from the center of the field, heading in RADIANS (or convert DEGREES to
@@ -124,19 +130,6 @@ public class TEST_Auto_Dev_Actions extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-
-        int targetPos;
-        double maxWheelPower;
-        double COUNTS_PER_DEGREE;
-        int COUNTS_PER_MOTOR_REV;
-        int GEAR_REDUCTION;
-        int COUNTS_PER_GEAR_REV;
-        int currentPos_Extender;
-        ElapsedTime intakeTimer;
-        int targetPos_Extender;
-        int targetPos_Wrist;
-        int targetPos_Hanger;
-        double velocityArmLift;
 
         //Set Hardware Map
         ArmLift = hardwareMap.get(DcMotor.class, "Arm Lift");
@@ -163,7 +156,7 @@ public class TEST_Auto_Dev_Actions extends LinearOpMode {
 
         targetPos = 0;           // Target arm position, in absolute position - encoder ticks
         targetPos_Extender = 0;  // Target arm position, in absolute position - encoder ticks
-        gainP = 0.002;           // Position controller proportional gain
+        gainP = 0.0025;           // Position controller proportional gain
         errorRateMAX = 0.4;      // Maximum arm movement speed
         currentPos = ArmLift.getCurrentPosition();         // Calculate absolute position considering initial position as zero
         targetPos = currentPos;
@@ -177,7 +170,7 @@ public class TEST_Auto_Dev_Actions extends LinearOpMode {
         // TODO: Set initial limelight pipeline for alliance color: 0=red, 1=blue, 2=yellow
         limelight.pipelineSwitch(1);
 
-        //Instantiate the roadrunner mecanum drive (via the OTOS localizer)
+        //Instantiate the roadrunner Mecanum drive (via the OTOS localizer)
         SparkFunOTOSDrive drive = new SparkFunOTOSDrive(hardwareMap, beginPose);
 
         telemetry.addData("Status", "Initialized");
@@ -190,14 +183,124 @@ public class TEST_Auto_Dev_Actions extends LinearOpMode {
 
         if(isStopRequested()) return;
 
+        //targetPos = (int) (35*COUNTS_PER_DEGREE);
+
         //Build the actions for our AUTO mode
         Actions.runBlocking(
                 drive.actionBuilder(beginPose)
-                        .stopAndAdd(new setArmPostionAction(ArmLift, COUNTS_PER_DEGREE, 35))
-                        .stopAndAdd(new setArmExtensionAction(ArmExtender,700))
-                        .waitSeconds(10)
-                        .stopAndAdd(new setIntakePowerAction(Intake,1))
-                        .waitSeconds(5)
+                        //.stopAndAdd(new setWristPositionAction(Wrist, 0.85))
+                        //.splineTo(new Vector2d(-51, -38), 90*Math.PI/180)
+                        //.splineTo(new Vector2d(-54, -54), -135*Math.PI/180)
+                        // Raise to top basket and eject sample
+                        .stopAndAdd(new SequentialAction(
+                                new ParallelAction(
+                                        new proportionalController(ArmLift, COUNTS_PER_DEGREE * 100,1, gainP,errorRateMAX),
+                                        new setWristPositionAction(Wrist, 0.4)
+                                ),
+                                new ParallelAction(
+                                        new proportionalController(ArmLift, COUNTS_PER_DEGREE * 100,2, gainP,errorRateMAX),
+                                        new setArmExtensionAction(ArmExtender,1550)
+                                ),
+                                //new SleepAction(0.5),
+                                new ejectSampleAction(Intake,1),
+                                new setIntakePowerAction(Intake, 0)
+                        ))
+                        //Retract to rest position and hold, then spline to next position
+                        .stopAndAdd(new SequentialAction(
+                                new ParallelAction(
+                                        new proportionalController(ArmLift, COUNTS_PER_DEGREE * 100,0.75, gainP,errorRateMAX),
+                                        new setArmExtensionAction(ArmExtender,0),
+                                        new setWristPositionAction(Wrist, 0.275)
+                                ),
+                                new proportionalController(ArmLift, COUNTS_PER_DEGREE * 0,1.5, gainP,errorRateMAX),
+                                new setIntakePowerAction(Intake, 1)
+                        ))
+                        //.splineTo(new Vector2d(-60.5, -38), 90*Math.PI/180)
+                        //Adjust to pick up sample
+                        .stopAndAdd(new SequentialAction(
+                                new ParallelAction(
+                                        new setArmExtensionAction(ArmExtender,150),
+                                        new setWristPositionAction(Wrist,0.6),
+                                        new intakeSampleAction(Intake,2)
+                                ),
+                                //Retract to rest position and hold
+                                new ParallelAction(
+                                        new setIntakePowerAction(Intake,0),
+                                        new setArmExtensionAction(ArmExtender,0),
+                                        new setWristPositionAction(Wrist,0.4)
+                                )
+
+                        ))
+                        //.splineTo(new Vector2d(-54, -54), -135*Math.PI/180)
+                        // Raise to top basket and eject sample
+                        .stopAndAdd(new SequentialAction(
+                                new ParallelAction(
+                                        new proportionalController(ArmLift, COUNTS_PER_DEGREE * 100,1.5, gainP,errorRateMAX),
+                                        new setWristPositionAction(Wrist, 0.4)
+                                ),
+                                new ParallelAction(
+                                        new proportionalController(ArmLift, COUNTS_PER_DEGREE * 100,2.5, gainP,errorRateMAX),
+                                        new setArmExtensionAction(ArmExtender,1550)
+                                ),
+                                //new SleepAction(0.5),
+                                new ejectSampleAction(Intake,1),
+                                new setIntakePowerAction(Intake, 0)
+                        ))
+                        //Retract to rest position and hold, then spline to next position
+                        .stopAndAdd(new SequentialAction(
+                                new ParallelAction(
+                                        new proportionalController(ArmLift, COUNTS_PER_DEGREE * 100,0.75, gainP,errorRateMAX),
+                                        new setArmExtensionAction(ArmExtender,0),
+                                        new setWristPositionAction(Wrist, 0.275)
+                                ),
+                                new proportionalController(ArmLift, COUNTS_PER_DEGREE * 0,1.5, gainP,errorRateMAX),
+                                new setIntakePowerAction(Intake, 1)
+                        ))
+                        //.splineTo(new Vector2d(-51,-38),90*Math.PI/180)
+                        //Adjust to pick up sample
+                        .stopAndAdd(new SequentialAction(
+                                new ParallelAction(
+                                        new setArmExtensionAction(ArmExtender,150),
+                                        new setWristPositionAction(Wrist,0.6),
+                                        new intakeSampleAction(Intake,2)
+                                ),
+                                //Retract to rest position and hold
+                                new ParallelAction(
+                                        new setIntakePowerAction(Intake,0),
+                                        new setArmExtensionAction(ArmExtender,0),
+                                        new setWristPositionAction(Wrist,0.4)
+                                )
+
+                        ))
+                        //.splineTo(new Vector2d(-54, -54), -135*Math.PI/180)
+                        // Raise to top basket and eject sample
+                        .stopAndAdd(new SequentialAction(
+                                new proportionalController(ArmLift, COUNTS_PER_DEGREE * 95,1.5, gainP,errorRateMAX),
+                                new ParallelAction(
+                                        new proportionalController(ArmLift, COUNTS_PER_DEGREE * 100,2.5, gainP,errorRateMAX),
+                                        new setArmExtensionAction(ArmExtender,1550),
+                                        new setWristPositionAction(Wrist, 0.4)
+                                ),
+                                //new SleepAction(0.5),
+                                new ejectSampleAction(Intake,1),
+                                new setIntakePowerAction(Intake, 0)
+                        ))
+                        // Drive to push last sample into net zone
+                        //.splineTo(new Vector2d(-51,-38),90*Math.PI/180)
+                        //.splineTo(new Vector2d(-60.5,-7),90*Math.PI/180)
+                        //.lineToY(-55)
+                        //Retract to storage position and raise hangers
+                        .stopAndAdd(new SequentialAction(
+                                new ParallelAction(
+                                        new proportionalController(ArmLift, COUNTS_PER_DEGREE * 100,0.75, gainP,errorRateMAX),
+                                        new setArmExtensionAction(ArmExtender,0),
+                                        new setWristPositionAction(Wrist, 0.6)
+                                ),
+                                new proportionalController(ArmLift, COUNTS_PER_DEGREE * 0,1.5, gainP,errorRateMAX),
+                                new setHangerPositionAction(ArmHangerLeft, ArmHangerRight, 180)
+                        ))
+
+
 //                        .splineTo(new Vector2d(-51, -38), 90*Math.PI/180)
 //                        .waitSeconds(2)
 //                        .splineTo(new Vector2d(-54, -54), -135*Math.PI/180)
@@ -212,12 +315,10 @@ public class TEST_Auto_Dev_Actions extends LinearOpMode {
                         .build());
 
 
-//        // Lift arm off of hard stop
-//        targetPos = (int) (COUNTS_PER_DEGREE * 30);
-//        targetPos_Extender = 0;
-        distanceColorSensor = ColorSensor_DistanceSensor.getDistance(DistanceUnit.INCH);  //Distance to the sample in the intake, used to switch off intake
 
-        ProportionalController(targetPos, gainP, errorRateMAX);  //Lift arm off of the stop
+//        distanceColorSensor = ColorSensor_DistanceSensor.getDistance(DistanceUnit.INCH);  //Distance to the sample in the intake, used to switch off intake
+
+        // ProportionalController(targetPos, gainP, errorRateMAX);  //Lift arm off of the stop
 
         SparkFunOTOS.Pose2D pos = otos.getPosition(); //Read OTOS Pose for telemetry
 
@@ -246,7 +347,6 @@ public class TEST_Auto_Dev_Actions extends LinearOpMode {
     //////////////////////////////////////////////////
 
     //Set the target arm position (assumes P-Controller is running in the background)
-    // Do we really need this?  Can we just set a value for targetPos in the action builder instead?
     public class setArmPostionAction implements Action {
         DcMotor ArmLift;
         double targetPos;
@@ -266,7 +366,7 @@ public class TEST_Auto_Dev_Actions extends LinearOpMode {
         }
     }
 
-    // Set the arm extension to a given position
+  // Extend the arm to a given position
     public class setArmExtensionAction implements Action {
         DcMotor ArmExtender;
         double targetPos_Extender;
@@ -281,7 +381,18 @@ public class TEST_Auto_Dev_Actions extends LinearOpMode {
             ArmExtender.setTargetPosition((int) targetPos_Extender);
             ArmExtender.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             ArmExtender.setPower(1);
-            return false;
+
+            if(ArmExtender.isBusy()){
+                return true;
+            } else {
+                return false;
+            }
+
+//            if(ArmExtender.getCurrentPosition() > targetPos_Extender){
+//                return true;
+//            } else {
+//                return false;
+//            }
         }
     }
 
@@ -307,7 +418,14 @@ public class TEST_Auto_Dev_Actions extends LinearOpMode {
             ArmHangerLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             ArmHangerRight.setPower(1);
             ArmHangerRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            return false;
+
+            if(ArmHangerLeft.isBusy() || ArmHangerRight.isBusy()){
+                return true;
+            } else {
+                return false;
+            }
+            //return ArmHangerLeft.getCurrentPosition() < targetPos_Hanger && ArmHangerRight.getCurrentPosition() < targetPos_Hanger;
+            //return false;
         }
     }
 
@@ -324,6 +442,8 @@ public class TEST_Auto_Dev_Actions extends LinearOpMode {
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket) {
             Wrist.setPosition(targetPos_Wrist);
+
+            //return Wrist.getPosition() != targetPos_Wrist;
             return false;
         }
     }
@@ -344,6 +464,141 @@ public class TEST_Auto_Dev_Actions extends LinearOpMode {
             return false;
         }
     }
+
+    // Intake a sample into the intake
+    public class intakeSampleAction implements Action {
+        CRServo Intake;
+        double maxTime;
+        ElapsedTime timer;
+
+        public intakeSampleAction(CRServo Intake, double maxTime) {
+            this.Intake = Intake;
+            this.maxTime = maxTime;
+        }
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            if (timer == null) {
+                timer = new ElapsedTime();
+            }
+
+            Intake.setPower(1);
+            telemetry.addData("SampleDistance: ", ColorSensor_DistanceSensor.getDistance(DistanceUnit.INCH));
+            telemetry.update();
+
+            if (ColorSensor_DistanceSensor.getDistance(DistanceUnit.INCH) > 1.75) {
+                return true;
+            } else {
+                return false;
+            }
+            //return false;
+        }
+    }
+
+    // Eject a sample from the intake
+    public class ejectSampleAction implements Action {
+        CRServo Intake;
+        double maxTime;
+        ElapsedTime timer;
+
+        public ejectSampleAction(CRServo Intake, double maxTime) {
+            this.Intake = Intake;
+            this.maxTime = maxTime;
+        }
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            if (timer == null) {
+                timer = new ElapsedTime();
+            }
+
+            Intake.setPower(-1);
+            telemetry.addData("SampleDistance: ", ColorSensor_DistanceSensor.getDistance(DistanceUnit.INCH));
+            telemetry.update();
+
+            if (ColorSensor_DistanceSensor.getDistance(DistanceUnit.INCH) < 1.75) {
+                return true;
+            } else {
+                return false;
+            }
+            //return false;
+        }
+    }
+
+// Simple wait time in seconds
+//
+public class waitTimeSecAction implements Action {
+       double maxTime;
+        ElapsedTime timer;
+
+        public waitTimeSecAction(double maxTime) {
+           this.maxTime = maxTime;
+        }
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            if (timer == null) {
+                timer = new ElapsedTime();
+            }
+            if (timer.seconds() < maxTime) {
+                return true;
+            } else {
+                return false;
+            }
+            //return false;
+        }
+    }
+
+    //Proportional Controller implemented as an action for parallel actions
+
+    public class proportionalController implements Action {
+        DcMotor ArmLift;
+        double target;
+        double P;
+        double RateMax;
+        double holdTime;
+        ElapsedTime timer;
+
+        public proportionalController(DcMotor ArmLift,double target,double holdTime, double P,double RateMax){
+            this.ArmLift = ArmLift;
+            this.target = target;
+            this.P = P;
+            this.RateMax = RateMax;
+            this.holdTime   = holdTime;
+        }
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            if (timer == null) {
+                timer = new ElapsedTime();
+            }
+
+            // Proportional Arm Position Controller
+            // Update current position
+            currentPos = ArmLift.getCurrentPosition();
+            // Calculate the error that the controller will work to minimize.  Means that it will try to make currentPos equal to targetPos.
+            errorPos = (int) (target - currentPos);
+            // This is the actual proportional control, with the rate of change limited to errorRateMAX.
+            // Note that it can be negative or positive depending on which direction the motor needs to turn (if the current position is larger than target or less than target).
+            motorPower = Math.min(Math.max(errorPos * gainP, -errorRateMAX), errorRateMAX);
+            if (Math.abs(motorPower) > 1) {
+                // Normalize motor power to be less than 1.0
+                motorPowerMAX = Math.abs(motorPower);
+                motorPower = motorPower / motorPowerMAX;
+            }
+            // Move the motor / arm in the proper direction, then do it all again in the loop.
+            ArmLift.setPower(motorPower);
+
+
+            if (timer.seconds() < holdTime) {
+                return true;
+            } else {
+                return false;
+            }
+            //return true;
+        }
+    }
+
 
     //////////////////////////////////////////////////
     // PRIVATE VOIDS REFERENCED IN THE PUBLIC VOID
@@ -380,108 +635,6 @@ public class TEST_Auto_Dev_Actions extends LinearOpMode {
     }
 
 
-//    private void VerifyColor_Initializations() {
-//        String colorAlliance;
-//
-//        LED_Intake.off();
-//        // //////// Set Current Alliance Color (to reject wrong colors
-//        // Enable this block to set alliance color to blue, otherwise it will be set to red.
-//        colorAlliance = "BLUE";
-//        // Used to reduce confusion. If our alliance color is blue, we reject red samples, if
-//        // it's red we reject blue samples. The only code chance is to "colorAlliance" above.
-//        colorReject = colorAlliance.equals("BLUE") ? "RED" : "BLUE";
-//        // //////// Initialize color sensor
-//        gainColorSensor = 35;
-//        countColorCompare = 0;
-//        statusColorCompare = false;
-//        colorSample = "NO SAMPLE PRESENT";
-//        // //////// Initialize LEDs
-//        waitForStart();
-//    }
-//
-//    /**
-//     * Describe this function...
-//     */
-//    private void VerifyColor_Runtime() {
-//        NormalizedRGBA myNormalizedColors;
-//
-//        // Put these blocks into the main While loop called while opModeIsActive
-//        // Sample color detection and verification to alliance color
-//        // Read the data from the color sensor
-//        myNormalizedColors = ((NormalizedColorSensor) ColorSensor_ColorSensor).getNormalizedColors();
-//        myColorData = myNormalizedColors.toColor();
-//        // Call the VerifySampleColor function to verify the color is blue or reed, compare to colorAlliance, and reject the wrong alliance color sample
-//        colorSample = VerifySampleColor(gainColorSensor, colorReject, myNormalizedColors);
-//    }
-//
-//    /**
-//     * Describe this function...
-//     */
-//    private void VerifyColor_Telemetry() {
-//        // Put these blocks into the main While loop with other telemetry (called while opModeIsActive)
-//        // /////// UPDATE TELEMETRY
-//        telemetry.addData("Sample Color: ", colorSample);
-//        telemetry.addData("Distance to Sample (in): ", Double.parseDouble(JavaUtil.formatNumber(ColorSensor_DistanceSensor.getDistance(DistanceUnit.INCH), 3)));
-//    }
-//
-//    /**
-//     * VerifySampleColor
-//     * Reads the color sensor data, uses the included calibration to determine the color of the
-//     * sample based on the Hue, and compares that color to the color that should be rejected
-//     * (the one that is not our current alliance color). Yellow samples are always accepted.
-//     * If rejected, a message is displayed and an LED is lit so the drive can reverse
-//     * the intake. You could add code to automatically reverse the intake and eject the
-//     * sample in the same section where the LED is turned on to make it more automatic.
-//     * The function uses the distance sensor in the color sensor to determine if the intake
-//     * is empty or if it has a sample present. If a sample is present, the distance to the
-//     * sample will be lower than a threshold (distanceColorSensor) that you must calibrate.
-//     */
-//    private String VerifySampleColor(float gainColorSensor,
-//                                     String colorReject,
-//                                     NormalizedRGBA myNormalizedColors) {
-//        float hueColorSensor;
-//        float saturationColorSensor;
-//        float valueColorSensor;
-//
-//        // Set up and read the color data when the function is called (reduces runtime)
-//        ((NormalizedColorSensor) ColorSensor_ColorSensor).setGain(gainColorSensor);
-//        hueColorSensor = JavaUtil.rgbToHue(Color.red(myColorData), Color.green(myColorData), Color.blue(myColorData));
-//        saturationColorSensor = JavaUtil.rgbToSaturation(Color.red(myColorData), Color.green(myColorData), Color.blue(myColorData));
-//        valueColorSensor = JavaUtil.rgbToValue(Color.red(myColorData), Color.green(myColorData), Color.blue(myColorData));
-//        distanceColorSensor = ColorSensor_DistanceSensor.getDistance(DistanceUnit.INCH);
-//        // Run the comparison and verification only if there is a sample present in the intake by using the distance sensor.
-//        // If a sample is in the intake, the distance will be smaller than if there isn't one there.  THE DISTANCE IS IN INCHES!!!
-//        if (distanceColorSensor < 1.75) {
-//            // Determine if the sample is red, yellow or blue based on the hue value.
-//            if (hueColorSensor < 35) {
-//                // If hue is less than the value, then it calls it red
-//                colorSample = "RED";
-//            } else if (hueColorSensor < 100) {
-//                // Since the hue wasn't less than the red value, it checks if it's less than the yellow value.  If so, then it's yellow.
-//                colorSample = "YELLOW";
-//            } else if (hueColorSensor > 200) {
-//                // Since the hue wasn't less than either value, it checks if it's greater than the blue value.  If so, then it's blue.
-//                colorSample = "BLUE";
-//            } else {
-//                // If the hue is not less than any of the values, then we don't know what color it is.
-//                colorSample = "UNKNOWN";
-//            }
-//            // Add a delay counter to reduce toggling in colorSample <> colorReject comparison: we want this to be reliable, not rest if the lighting shifts.
-//            // This is where we compare the color to the alliance color we want to reject.  If they are the same, then statusColorCompare is "true," if not then it's "false"
-//            statusColorCompare = colorReject == colorSample;
-//            if (statusColorCompare == true) {
-//                // If the sample is not our alliance color, we put a messge on the display, light the LED, and rumble the controller
-//                telemetry.addLine("!!!!!! WRONG SAMPLE COLOR - REJECTING SAMPLE !!!!!!");
-//                countColorCompare = countColorCompare + 1;
-//                LED_Intake.on();
-//                Intake.setPower(-1);
-//            }
-//        } else {
-//            LED_Intake.off();
-//            colorSample = "NO SAMPLE PRESENT";
-//        }
-//        return colorSample;
-//    }
     private void ProportionalController(double targetPos, double P, double RateMAX) {
         // Proportional Arm Position Controller
         // Update current position

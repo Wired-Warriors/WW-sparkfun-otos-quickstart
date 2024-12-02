@@ -39,6 +39,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.acmerobotics.roadrunner.TrajectoryBuilder;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
@@ -69,8 +70,8 @@ import com.qualcomm.robotcore.hardware.Servo;
  * THIS MODE IS CONFIGURED FOR PANCAKE, NOT WAFFLES
  *
  */
-@Autonomous(name="TEST_AUTO_Development", group="AUTO")
-//@Disabled
+@Autonomous(name="TEST_AUTO_Dev 2", group="AUTO")
+@Disabled
 public class TEST_Auto_Dev_2 extends LinearOpMode {
 
     // Declare OpMode members.

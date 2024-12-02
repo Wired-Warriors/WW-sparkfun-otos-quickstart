@@ -31,19 +31,11 @@ package org.firstinspires.ftc.teamcode;
 
 import androidx.annotation.NonNull;
 
-import com.acmerobotics.dashboard.canvas.Spline;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.InstantAction;
-import com.acmerobotics.roadrunner.InstantFunction;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.SleepAction;
-import com.acmerobotics.roadrunner.Trajectory;
-import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
-import com.acmerobotics.roadrunner.TrajectoryBuilder;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -54,11 +46,13 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.LED;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 
@@ -72,15 +66,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  *
  * All of the drive configuration is done via MecanumDrive.java, you do not have to manage that here.
  *
- * THIS MODE IS CONFIGURED FOR PANCAKE, NOT WAFFLES
+ * THIS MODE IS CONFIGURED FOR WAFFLES, NOT PANCAKE
  *
  */
-@Autonomous(name="TEST_AUTO_Development PID Action", group="AUTO")
+@Autonomous(name="TEST-AUTO-BLUE-1", group="AUTO", preselectTeleOp = "ManualOPBlueAllianceLightIntake (Blocks to Java)")
 //@Disabled
-public class TEST_Auto_Dev_Actions_PIDAction extends LinearOpMode {
+public class TEST_Auto_Blue_1 extends LinearOpMode {
 
     // Declare OpMode members.
-    private ElapsedTime runtime = new ElapsedTime();
+    //private ElapsedTime runtime = new ElapsedTime();
     private Limelight3A limelight;
     private SparkFunOTOS otos;
     private DcMotor ArmLift;
@@ -89,9 +83,13 @@ public class TEST_Auto_Dev_Actions_PIDAction extends LinearOpMode {
     private DcMotor ArmHangerRight;
     private CRServo Intake;
     private Servo Wrist;
-    private LED LED_Intake;
-    private ColorSensor ColorSensor_ColorSensor;
+//    private LED LED_Intake;
+//    private ColorSensor ColorSensor_ColorSensor;
     private DistanceSensor ColorSensor_DistanceSensor;
+    private DcMotor leftFront;
+    private DcMotor leftBack;
+    private DcMotor rightFront;
+    private DcMotor rightBack;
 
     /////////////////////////////////////////////////////////////////////////
     // Declare variables
@@ -117,7 +115,7 @@ public class TEST_Auto_Dev_Actions_PIDAction extends LinearOpMode {
     double gainP;
     double motorPowerMAX;
     double powerIntake = 0;
-public int targetPos;
+    public int targetPos;
     //int targetPos;
     double maxWheelPower;
     double COUNTS_PER_DEGREE;
@@ -146,8 +144,8 @@ public int targetPos;
         ArmHangerRight = hardwareMap.get(DcMotor.class, "Arm Hanger Right");
         Intake = hardwareMap.get(CRServo.class, "Intake");
         Wrist = hardwareMap.get(Servo.class, "Wrist");
-        LED_Intake = hardwareMap.get(LED.class, "LED_Intake");
-        ColorSensor_ColorSensor = hardwareMap.get(ColorSensor.class, "Color Sensor");
+//        LED_Intake = hardwareMap.get(LED.class, "LED_Intake");
+//        ColorSensor_ColorSensor = hardwareMap.get(ColorSensor.class, "Color Sensor");
         ColorSensor_DistanceSensor = hardwareMap.get(DistanceSensor.class, "Color Sensor");
         otos = hardwareMap.get(SparkFunOTOS.class, "otos");
 
@@ -157,7 +155,7 @@ public int targetPos;
         COUNTS_PER_MOTOR_REV = 28;
         GEAR_REDUCTION = 144;
         COUNTS_PER_GEAR_REV = COUNTS_PER_MOTOR_REV * GEAR_REDUCTION;
-        COUNTS_PER_DEGREE = COUNTS_PER_GEAR_REV / 360;
+        COUNTS_PER_DEGREE = (double) COUNTS_PER_GEAR_REV / 360;
         currentPos_Extender = ArmExtender.getCurrentPosition();
         intakeTimer = new ElapsedTime();
 //        VerifyColor_Initializations(); // Initialize Color Sensor
@@ -176,9 +174,9 @@ public int targetPos;
         ((DcMotorEx) ArmExtender).setMotorEnable();
 
         // TODO: Set initial limelight pipeline for alliance color: 0=red, 1=blue, 2=yellow
-        limelight.pipelineSwitch(1);
+        limelight.pipelineSwitch(2);
 
-        //Instantiate the roadrunner mecanum drive (via the OTOS localizer)
+        //Instantiate the roadrunner Mecanum drive (via the OTOS localizer)
         SparkFunOTOSDrive drive = new SparkFunOTOSDrive(hardwareMap, beginPose);
 
         telemetry.addData("Status", "Initialized");
@@ -224,6 +222,8 @@ public int targetPos;
                                 new setIntakePowerAction(Intake, 1)
                         ))
                         //.splineTo(new Vector2d(-60.5, -38), 90*Math.PI/180)
+                        //Strafe to line up on sample
+                        //.stopAndAdd(new strafeToTargetAction(5,0.01,0.3, 1))
                         //Adjust to pick up sample
                         .stopAndAdd(new SequentialAction(
                                 new ParallelAction(
@@ -265,6 +265,8 @@ public int targetPos;
                                 new setIntakePowerAction(Intake, 1)
                         ))
                         //.splineTo(new Vector2d(-51,-38),90*Math.PI/180)
+                        //Strafe to line up on sample
+                        //.stopAndAdd(new strafeToTargetAction(5,0.01,0.3, 1))
                         //Adjust to pick up sample
                         .stopAndAdd(new SequentialAction(
                                 new ParallelAction(
@@ -321,12 +323,9 @@ public int targetPos;
 //                        .splineTo(new Vector2d(-60.5,-7),90*Math.PI/180)
 //                        .lineToY(-55)
                         .build());
+        
 
-
-//        // Lift arm off of hard stop
-//        targetPos = (int) (COUNTS_PER_DEGREE * 30);
-//        targetPos_Extender = 0;
-        distanceColorSensor = ColorSensor_DistanceSensor.getDistance(DistanceUnit.INCH);  //Distance to the sample in the intake, used to switch off intake
+//        distanceColorSensor = ColorSensor_DistanceSensor.getDistance(DistanceUnit.INCH);  //Distance to the sample in the intake, used to switch off intake
 
         // ProportionalController(targetPos, gainP, errorRateMAX);  //Lift arm off of the stop
 
@@ -356,26 +355,25 @@ public int targetPos;
     //PUBLIC CLASSES FOR ROADRUNNER ACTION DEFINITIONS
     //////////////////////////////////////////////////
 
-    //Set the target arm position (assumes P-Controller is running in the background)
-    // Do we really need this?  Can we just set a value for targetPos in the action builder instead?
-    public class setArmPostionAction implements Action {
-        DcMotor ArmLift;
-        double targetPos;
-        double COUNTS_PER_DEGREE;
-
-        public setArmPostionAction(DcMotor ArmLift,double COUNTS_PER_DEGREE, double targetPos) {
-            this.ArmLift = ArmLift;
-            this.targetPos = targetPos;
-            this.COUNTS_PER_DEGREE = COUNTS_PER_DEGREE;
-        }
-
-        @Override
-        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-            targetPos = (int) (COUNTS_PER_DEGREE * 100);
-
-            return false;
-        }
-    }
+//    //Set the target arm position (assumes P-Controller is running in the background)
+//    public class setArmPostionAction implements Action {
+//        DcMotor ArmLift;
+//        double targetPos;
+//        double COUNTS_PER_DEGREE;
+//
+//        public setArmPostionAction(DcMotor ArmLift,double COUNTS_PER_DEGREE, double targetPos) {
+//            this.ArmLift = ArmLift;
+//            this.targetPos = targetPos;
+//            this.COUNTS_PER_DEGREE = COUNTS_PER_DEGREE;
+//        }
+//
+//        @Override
+//        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+//            targetPos = (int) (COUNTS_PER_DEGREE * 100);
+//
+//            return false;
+//        }
+//    }
 
   // Extend the arm to a given position
     public class setArmExtensionAction implements Action {
@@ -430,7 +428,12 @@ public int targetPos;
             ArmHangerRight.setPower(1);
             ArmHangerRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-            return ArmHangerLeft.getCurrentPosition() < targetPos_Hanger && ArmHangerRight.getCurrentPosition() < targetPos_Hanger;
+            if(ArmHangerLeft.isBusy() || ArmHangerRight.isBusy()){
+                return true;
+            } else {
+                return false;
+            }
+            //return ArmHangerLeft.getCurrentPosition() < targetPos_Hanger && ArmHangerRight.getCurrentPosition() < targetPos_Hanger;
             //return false;
         }
     }
@@ -531,32 +534,7 @@ public int targetPos;
         }
     }
 
-// Simple wait time in seconds
-//
-public class waitTimeSecAction implements Action {
-       double maxTime;
-        ElapsedTime timer;
-
-        public waitTimeSecAction(double maxTime) {
-           this.maxTime = maxTime;
-        }
-
-        @Override
-        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-            if (timer == null) {
-                timer = new ElapsedTime();
-            }
-            if (timer.seconds() < maxTime) {
-                return true;
-            } else {
-                return false;
-            }
-            //return false;
-        }
-    }
-
     //Proportional Controller implemented as an action for parallel actions
-
     public class proportionalController implements Action {
         DcMotor ArmLift;
         double target;
@@ -602,6 +580,88 @@ public class waitTimeSecAction implements Action {
                 return false;
             }
             //return true;
+        }
+    }
+
+    // Strafe to limelight target action
+    // Based on Drive To Target function from Blocks AUTO modes
+    public class strafeToTargetAction implements Action {
+        double maxTime;
+        ElapsedTime timer;
+        double kPStrafe;
+        double speedMax;
+        double errorMin;
+        double strafe;
+        double tX;
+        double powerLF;
+        double powerLR;
+        double powerRF;
+        double powerRR;
+        double powerMax;
+
+
+        public strafeToTargetAction(double maxTime,double kPStrafe,double speedMax,double errorMin) {
+            this.maxTime = maxTime;
+            this.kPStrafe = kPStrafe;
+            this.speedMax = speedMax;
+            this.errorMin = errorMin;
+        }
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            if (timer == null) {  //Initialize timer
+                timer = new ElapsedTime();
+                // TODO: make sure your config has motors with these names (or change them)
+                //   see https://ftc-docs.firstinspires.org/en/latest/hardware_and_software_configuration/configuring/index.html
+                leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
+                leftBack = hardwareMap.get(DcMotorEx.class, "leftBack");
+                rightBack = hardwareMap.get(DcMotorEx.class, "rightBack");
+                rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
+
+                leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+                // TODO: reverse motor directions if needed
+                //   leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
+                leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
+                leftBack.setDirection(DcMotorSimple.Direction.REVERSE);
+                rightFront.setDirection(DcMotorSimple.Direction.FORWARD);
+                rightBack.setDirection(DcMotorSimple.Direction.REVERSE);
+            }
+            // Get LimeLight results (pipeline was set in the initializations)
+            LLResult result = limelight.getLatestResult();
+            if (result != null && result.isValid()) {
+                tX = result.getTx(); // How far left or right the target is (degrees)
+            }
+
+            strafe = Math.min(Math.max(tX*kPStrafe,-speedMax),speedMax);
+
+            powerLF = -strafe;
+            powerRF = strafe;
+            powerLR = strafe;
+            powerRR = -strafe;
+
+            powerMax = JavaUtil.maxOfList(JavaUtil.createListWith(Math.abs(powerLF), Math.abs(powerRF), Math.abs(powerLR), Math.abs(powerRR)));
+            if (powerMax > 1) {
+                powerLF = powerLF / powerMax;
+                powerRF = powerRF / powerMax;
+                powerLR = powerLR / powerMax;
+                powerRR = powerRR / powerMax;
+            }
+
+            leftFront.setPower(powerLF);
+            leftBack.setPower(powerLR);
+            rightFront.setPower(powerRF);
+            rightBack.setPower(powerRR);
+
+            if (tX < errorMin) {
+                return true;
+            } else {
+                return false;
+            }
+            //return false;
         }
     }
 
