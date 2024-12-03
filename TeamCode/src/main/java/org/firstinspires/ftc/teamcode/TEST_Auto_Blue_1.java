@@ -172,6 +172,8 @@ public class TEST_Auto_Blue_1 extends LinearOpMode {
         targetPos_Wrist = 0;
         ((DcMotorEx) ArmLift).setMotorEnable();
         ((DcMotorEx) ArmExtender).setMotorEnable();
+        ((DcMotorEx) ArmHangerLeft).setMotorEnable();
+        ((DcMotorEx) ArmHangerRight).setMotorEnable();
 
         // TODO: Set initial limelight pipeline for alliance color: 0=red, 1=blue, 2=yellow
         limelight.pipelineSwitch(2);
@@ -204,7 +206,7 @@ public class TEST_Auto_Blue_1 extends LinearOpMode {
                                         new setWristPositionAction(Wrist, 0.4)
                                 ),
                                 new ParallelAction(
-                                        new proportionalController(ArmLift, COUNTS_PER_DEGREE * 100,2, gainP,errorRateMAX),
+                                        new proportionalController(ArmLift, COUNTS_PER_DEGREE * 100,1.5, gainP,errorRateMAX),
                                         new setArmExtensionAction(ArmExtender,1550)
                                 ),
                                 //new SleepAction(0.5),
@@ -215,26 +217,27 @@ public class TEST_Auto_Blue_1 extends LinearOpMode {
                         .stopAndAdd(new SequentialAction(
                                 new ParallelAction(
                                         new proportionalController(ArmLift, COUNTS_PER_DEGREE * 100,0.75, gainP,errorRateMAX),
-                                        new setArmExtensionAction(ArmExtender,0),
-                                        new setWristPositionAction(Wrist, 0.275)
+                                        new setArmExtensionAction(ArmExtender,5),
+                                        new setWristPositionAction(Wrist, 0.5)
                                 ),
-                                new proportionalController(ArmLift, COUNTS_PER_DEGREE * 0,1.5, gainP,errorRateMAX),
+                                new proportionalController(ArmLift, COUNTS_PER_DEGREE * 5,1.5, gainP,errorRateMAX),
+                                new setArmPowerOffAction(ArmLift),
                                 new setIntakePowerAction(Intake, 1)
                         ))
-                        //.splineTo(new Vector2d(-60.5, -38), 90*Math.PI/180)
+                        //.splineTo(new Vector2d(-60.5, -41.5), 90*Math.PI/180)
                         //Strafe to line up on sample
                         //.stopAndAdd(new strafeToTargetAction(5,0.01,0.3, 1))
                         //Adjust to pick up sample
                         .stopAndAdd(new SequentialAction(
+                                //new setWristPositionAction(Wrist,0.5),
                                 new ParallelAction(
-                                        new setArmExtensionAction(ArmExtender,150),
-                                        new setWristPositionAction(Wrist,0.6),
+                                        new setArmExtensionAction(ArmExtender,300),
                                         new intakeSampleAction(Intake,2)
                                 ),
                                 //Retract to rest position and hold
                                 new ParallelAction(
                                         new setIntakePowerAction(Intake,0),
-                                        new setArmExtensionAction(ArmExtender,0),
+                                        new setArmExtensionAction(ArmExtender,5),
                                         new setWristPositionAction(Wrist,0.4)
                                 )
 
@@ -247,7 +250,7 @@ public class TEST_Auto_Blue_1 extends LinearOpMode {
                                         new setWristPositionAction(Wrist, 0.4)
                                 ),
                                 new ParallelAction(
-                                        new proportionalController(ArmLift, COUNTS_PER_DEGREE * 100,2.5, gainP,errorRateMAX),
+                                        new proportionalController(ArmLift, COUNTS_PER_DEGREE * 100,1.5, gainP,errorRateMAX),
                                         new setArmExtensionAction(ArmExtender,1550)
                                 ),
                                 //new SleepAction(0.5),
@@ -258,26 +261,26 @@ public class TEST_Auto_Blue_1 extends LinearOpMode {
                         .stopAndAdd(new SequentialAction(
                                 new ParallelAction(
                                         new proportionalController(ArmLift, COUNTS_PER_DEGREE * 100,0.75, gainP,errorRateMAX),
-                                        new setArmExtensionAction(ArmExtender,0),
-                                        new setWristPositionAction(Wrist, 0.275)
+                                        new setArmExtensionAction(ArmExtender,5),
+                                        new setWristPositionAction(Wrist, 0.5)
                                 ),
                                 new proportionalController(ArmLift, COUNTS_PER_DEGREE * 0,1.5, gainP,errorRateMAX),
+                                new setArmPowerOffAction(ArmLift),
                                 new setIntakePowerAction(Intake, 1)
                         ))
-                        //.splineTo(new Vector2d(-51,-38),90*Math.PI/180)
+                        //.splineTo(new Vector2d(-51,-41.5),90*Math.PI/180)
                         //Strafe to line up on sample
                         //.stopAndAdd(new strafeToTargetAction(5,0.01,0.3, 1))
                         //Adjust to pick up sample
                         .stopAndAdd(new SequentialAction(
                                 new ParallelAction(
-                                        new setArmExtensionAction(ArmExtender,150),
-                                        new setWristPositionAction(Wrist,0.6),
+                                        new setArmExtensionAction(ArmExtender,300),
                                         new intakeSampleAction(Intake,2)
                                 ),
                                 //Retract to rest position and hold
                                 new ParallelAction(
                                         new setIntakePowerAction(Intake,0),
-                                        new setArmExtensionAction(ArmExtender,0),
+                                        new setArmExtensionAction(ArmExtender,5),
                                         new setWristPositionAction(Wrist,0.4)
                                 )
 
@@ -287,7 +290,7 @@ public class TEST_Auto_Blue_1 extends LinearOpMode {
                         .stopAndAdd(new SequentialAction(
                                 new proportionalController(ArmLift, COUNTS_PER_DEGREE * 95,1.5, gainP,errorRateMAX),
                                 new ParallelAction(
-                                        new proportionalController(ArmLift, COUNTS_PER_DEGREE * 100,2.5, gainP,errorRateMAX),
+                                        new proportionalController(ArmLift, COUNTS_PER_DEGREE * 100,1.5, gainP,errorRateMAX),
                                         new setArmExtensionAction(ArmExtender,1550),
                                         new setWristPositionAction(Wrist, 0.4)
                                 ),
@@ -303,11 +306,12 @@ public class TEST_Auto_Blue_1 extends LinearOpMode {
                         .stopAndAdd(new SequentialAction(
                                 new ParallelAction(
                                         new proportionalController(ArmLift, COUNTS_PER_DEGREE * 100,0.75, gainP,errorRateMAX),
-                                        new setArmExtensionAction(ArmExtender,0),
+                                        new setArmExtensionAction(ArmExtender,10),
                                         new setWristPositionAction(Wrist, 0.6)
                                 ),
-                                new proportionalController(ArmLift, COUNTS_PER_DEGREE * 0,1.5, gainP,errorRateMAX),
-                                new setHangerPositionAction(ArmHangerLeft, ArmHangerRight, 180)
+                                new proportionalController(ArmLift, COUNTS_PER_DEGREE * 5,1.5, gainP,errorRateMAX),
+                                new setArmPowerOffAction(ArmLift),
+                                new setHangerPositionAction(ArmHangerLeft, ArmHangerRight, 350,2)
                         ))
 
 
@@ -326,8 +330,6 @@ public class TEST_Auto_Blue_1 extends LinearOpMode {
         
 
 //        distanceColorSensor = ColorSensor_DistanceSensor.getDistance(DistanceUnit.INCH);  //Distance to the sample in the intake, used to switch off intake
-
-        // ProportionalController(targetPos, gainP, errorRateMAX);  //Lift arm off of the stop
 
         SparkFunOTOS.Pose2D pos = otos.getPosition(); //Read OTOS Pose for telemetry
 
@@ -410,31 +412,56 @@ public class TEST_Auto_Blue_1 extends LinearOpMode {
         DcMotor ArmHangerLeft;
         DcMotor ArmHangerRight;
         double targetPos_Hanger;
+        double hangTime;
+        ElapsedTime timer;
 
-        public setHangerPositionAction(DcMotor ArmHangerLeft, DcMotor ArmHangerRight, double targetPos_Hanger) {
+        public setHangerPositionAction(DcMotor ArmHangerLeft, DcMotor ArmHangerRight, double targetPos_Hanger, double hangTime) {
             this.ArmHangerLeft = ArmHangerLeft;
             this.ArmHangerRight = ArmHangerRight;
             this.targetPos_Hanger = targetPos_Hanger;
+            this.hangTime = hangTime;
         }
 
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-            ((DcMotorEx) ArmHangerLeft).setMotorEnable();
-            ArmHangerLeft.setTargetPosition((int) targetPos_Hanger);
-            ((DcMotorEx) ArmHangerRight).setMotorEnable();
-            ArmHangerRight.setTargetPosition((int) targetPos_Hanger);
-            ArmHangerLeft.setPower(1);
-            ArmHangerLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            ArmHangerRight.setPower(1);
-            ArmHangerRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            if (timer == null) {
+                timer = new ElapsedTime();
+            }
 
-            if(ArmHangerLeft.isBusy() || ArmHangerRight.isBusy()){
+            ArmHangerLeft.setTargetPosition((int) targetPos_Hanger);
+            ArmHangerRight.setTargetPosition((int) targetPos_Hanger);
+            ArmHangerLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            ArmHangerRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            ArmHangerLeft.setPower(1);
+            ArmHangerRight.setPower(1);
+
+            if (timer.seconds() < hangTime) {
                 return true;
             } else {
                 return false;
             }
-            //return ArmHangerLeft.getCurrentPosition() < targetPos_Hanger && ArmHangerRight.getCurrentPosition() < targetPos_Hanger;
-            //return false;
+
+//            if(ArmHangerRight.isBusy()){
+//                return true;
+//            } else {
+//                return false;
+//            }
+        }
+    }
+
+
+    // Set the Arm power to zero
+    public class setArmPowerOffAction implements Action {
+        DcMotor ArmLift;
+
+        public setArmPowerOffAction(DcMotor ArmLift) {
+            this.ArmLift=ArmLift;
+        }
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            ArmLift.setPower(0);
+            return false;
         }
     }
 
@@ -525,7 +552,7 @@ public class TEST_Auto_Blue_1 extends LinearOpMode {
             telemetry.addData("SampleDistance: ", ColorSensor_DistanceSensor.getDistance(DistanceUnit.INCH));
             telemetry.update();
 
-            if (ColorSensor_DistanceSensor.getDistance(DistanceUnit.INCH) < 1.75) {
+            if (ColorSensor_DistanceSensor.getDistance(DistanceUnit.INCH) < 2.00 ) {
                 return true;
             } else {
                 return false;
@@ -689,11 +716,11 @@ public class TEST_Auto_Blue_1 extends LinearOpMode {
         ArmExtender.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         ArmExtender.setDirection(DcMotor.Direction.REVERSE);
         ArmHangerLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        ArmHangerLeft.setDirection(DcMotor.Direction.FORWARD);
+        ArmHangerLeft.setDirection(DcMotor.Direction.REVERSE);
         ArmHangerLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         ArmHangerLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         ArmHangerRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        ArmHangerRight.setDirection(DcMotor.Direction.FORWARD);
+        ArmHangerRight.setDirection(DcMotor.Direction.REVERSE);
         ArmHangerRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         ArmHangerRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Intake.setDirection(CRServo.Direction.REVERSE);
