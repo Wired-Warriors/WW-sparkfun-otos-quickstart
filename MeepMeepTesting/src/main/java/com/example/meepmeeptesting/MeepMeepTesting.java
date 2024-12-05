@@ -32,6 +32,8 @@ public class MeepMeepTesting {
                         //`.turnTo(Math.toRadians(-180))
                 .splineTo(new Vector2d(-51, -42), 90*Math.PI/180)
                                 .waitSeconds(2)
+                .splineTo(new Vector2d(-40, -45), -135*Math.PI/180)
+                .waitSeconds(2)
                 .splineTo(new Vector2d(-54, -54), -135*Math.PI/180)
                                 .waitSeconds(2)
                 .splineTo(new Vector2d(-60.5, -42), 90*Math.PI/180)
