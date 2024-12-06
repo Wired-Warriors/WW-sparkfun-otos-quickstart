@@ -44,12 +44,10 @@ import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.LED;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -70,9 +68,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * THIS MODE IS CONFIGURED FOR WAFFLES, NOT PANCAKE
  *
  */
-@Autonomous(name="TEST-AUTO-BLUE-1", group="AUTO", preselectTeleOp = "ManualOPBlueAllianceLightIntake (Blocks to Java)")
+@Autonomous(name="AUTO-BLUE-6", group="AUTO", preselectTeleOp = "TELEOP-BLUE")
 //@Disabled
-public class TEST_Auto_Blue_1 extends LinearOpMode {
+public class AUTO_BLUE_6 extends LinearOpMode {
 
     // Declare OpMode members.
     //private ElapsedTime runtime = new ElapsedTime();
@@ -143,7 +141,7 @@ public class TEST_Auto_Blue_1 extends LinearOpMode {
     //TODO *********** Set the starting pose for the robot based on the alliance start position,
     // X and Y in INCHES from the center of the field, heading in RADIANS (or convert DEGREES to
     // RADIANS by multiplying the value in DEGREES by Math.PI/180
-    Pose2d beginPose = new Pose2d(-16.5, -62.69, 90*Math.PI/180);
+    Pose2d beginPose = new Pose2d(16.5, -62.69, 90*Math.PI/180);
 
     @Override
     public void runOpMode() {
@@ -206,9 +204,9 @@ public class TEST_Auto_Blue_1 extends LinearOpMode {
         ArmStore = 0;
 
         //Set all field positions
-        Vector2d waypointBasket = new Vector2d(-54,-54);
-        Vector2d waypointSample1 = new Vector2d(-48.5,-36.5);
-        Vector2d waypointSample2 = new Vector2d(-58.25, -36.5);
+        Pose2d waypointBasket = new Pose2d(-54,-54,Math.toRadians(-135));
+        Pose2d waypointSample1 = new Pose2d(-48.5,-36.5,Math.toRadians(90));
+        Pose2d waypointSample2 = new Pose2d(-58.25, -36.5,Math.toRadians(90));
         Vector2d waypointSample3Bypass = new Vector2d(-51,-39);
         Vector2d waypointSample3Push = new Vector2d(-61,-7);
 
@@ -227,136 +225,21 @@ public class TEST_Auto_Blue_1 extends LinearOpMode {
         //Build the actions for our AUTO mode
         Actions.runBlocking(
                 drive.actionBuilder(beginPose)
-                        //.stopAndAdd(new setWristPositionAction(Wrist, 0.85))
-                        //.splineTo(new Vector2d(63.75, 63.75), Math.PI/4)
-                        //.splineTo(new Vector2d(-51, -41.5), 90*Math.PI/180)
-                        .splineTo(waypointBasket, -135*Math.PI/180)
-                        // Raise to top basket and eject sample
-                        .stopAndAdd(new SequentialAction(
-                                new ParallelAction(
-                                        new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmFull,2, gainP,errorRateMAX),
-                                        new setWristPositionAction(Wrist, WristEject)
-                                ),
-                                new ParallelAction(
-                                        new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmFull,1.5, gainP,errorRateMAX),
-                                        new setArmExtensionAction(ArmExtender,0.75,ExtenderFull)
-                                ),
-                                //new SleepAction(0.5),
-                                new ejectSampleAction(Intake,1),
-                                new setIntakePowerAction(Intake, 0)
-                        ))
-                        //Retract to rest position and hold, then spline to next position
-                        .stopAndAdd(new SequentialAction(
-                                new ParallelAction(
-                                        new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmFull,0.75, gainP,errorRateMAX),
-                                        new setArmExtensionAction(ArmExtender,0.75,ExtenderRetract),
-                                        new setWristPositionAction(Wrist, WristIntake)
-                                ),
-                                new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmStore,1.5, gainP,errorRateMAX),
-                                new setArmPowerOffAction(ArmLift),
-                                new setIntakePowerAction(Intake, 1)
-                        ))
-                        .splineTo(waypointSample2, 90*Math.PI/180)
-                        //Strafe to line up on sample
-                        //.stopAndAdd(new strafeToTargetAction(5,0.01,0.3, 1))
-                        //Adjust to pick up sample
-                        .stopAndAdd(new SequentialAction(
-                                //new setWristPositionAction(Wrist,0.5),
-                                new ParallelAction(
-                                        new setArmExtensionAction(ArmExtender,0.5,ExtenderIntake),
-                                        new intakeSampleAction(Intake,2)
-                                ),
-                                //Retract to rest position and hold
-                                new ParallelAction(
-                                        new setIntakePowerAction(Intake,0),
-                                        new setArmExtensionAction(ArmExtender,0.5,ExtenderRetract),
-                                        new setWristPositionAction(Wrist,WristEject)
-                                )
-
-                        ))
-                        .splineTo(new Vector2d(-38, -48), -90*Math.PI/180)
-                        .splineTo(waypointBasket, -135*Math.PI/180)
-                        // Raise to top basket and eject sample
-                        .stopAndAdd(new SequentialAction(
-                                new ParallelAction(
-                                        new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmFull,1.5, gainP,errorRateMAX)
-                                ),
-                                new ParallelAction(
-                                        new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmFull,1.5, gainP,errorRateMAX),
-                                        new setArmExtensionAction(ArmExtender,0.75,ExtenderFull)
-                                ),
-                                //new SleepAction(0.5),
-                                new ejectSampleAction(Intake,1),
-                                new setIntakePowerAction(Intake, 0)
-                        ))
-                        //Retract to rest position and hold, then spline to next position
-                        .stopAndAdd(new SequentialAction(
-                                new ParallelAction(
-                                        new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmFull,0.75, gainP,errorRateMAX),
-                                        new setArmExtensionAction(ArmExtender,0.75,ExtenderRetract),
-                                        new setWristPositionAction(Wrist, WristIntake)
-                                ),
-                                new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmStore,1.5, gainP,errorRateMAX),
-                                new setArmPowerOffAction(ArmLift),
-                                new setIntakePowerAction(Intake, 1)
-                        ))
-                        .splineTo(waypointSample1,90*Math.PI/180)
-                        //Strafe to line up on sample
-                        //.stopAndAdd(new strafeToTargetAction(5,0.01,0.3, 1))
-                        //Adjust to pick up sample
-                        .stopAndAdd(new SequentialAction(
-                                new ParallelAction(
-                                        new setArmExtensionAction(ArmExtender,0.5,ExtenderIntake),
-                                        new intakeSampleAction(Intake,2)
-                                ),
-                                //Retract to rest position and hold
-                                new ParallelAction(
-                                        new setIntakePowerAction(Intake,0),
-                                        new setArmExtensionAction(ArmExtender,0.5,ExtenderRetract),
-                                        new setWristPositionAction(Wrist,WristEject)
-                                )
-
-                        ))
-                        .splineTo(waypointBasket, -135*Math.PI/180)
-                        // Raise to top basket and eject sample
-                        .stopAndAdd(new SequentialAction(
-                                new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmFull,1.5, gainP,errorRateMAX),
-                                new ParallelAction(
-                                        new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmFull,1.5, gainP,errorRateMAX),
-                                        new setArmExtensionAction(ArmExtender,0.75,ExtenderFull),
-                                        new setHangerPositionAction(ArmHangerLeft, ArmHangerRight, HangerUp,2.25)
-                                ),
-                                //new SleepAction(0.5),
-                                new ejectSampleAction(Intake,1),
-                                new setIntakePowerAction(Intake, 0)
-                        ))
-                        // Drive to push last sample into net zone
-                        .splineTo(waypointSample3Bypass,90*Math.PI/180)
-                        .splineTo(waypointSample3Push,90*Math.PI/180)
                         .lineToY(-55)
-                        //Retract to storage position and raise hangers
-                        .stopAndAdd(new SequentialAction(
-                                new ParallelAction(
-                                        new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmFull,0.75, gainP,errorRateMAX),
-                                        new setArmExtensionAction(ArmExtender,0.75,ExtenderRetract),
-                                        new setWristPositionAction(Wrist, WristStore)
-                                ),
-                                new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmStore,1.5, gainP,errorRateMAX),
-                                new setArmPowerOffAction(ArmLift)
-                        ))
-
-
-//                        .splineTo(new Vector2d(-51, -38), 90*Math.PI/180)
-//                        .waitSeconds(2)
-//                        .splineTo(new Vector2d(-54, -54), -135*Math.PI/180)
-//                        .waitSeconds(2)
-//                        .splineTo(new Vector2d(-60.5, -38), 90*Math.PI/180)
-//                        .waitSeconds(2)
-//                        .splineTo(new Vector2d(-54, -54), -135*Math.PI/180)
-//                        .waitSeconds(2)
-//                        .splineTo(new Vector2d(-51,-38),90*Math.PI/180)
-//                        .splineTo(new Vector2d(-60.5,-7),90*Math.PI/180)
-//                        .lineToY(-55)
+                        .setTangent(0)
+                        .splineToConstantHeading(new Vector2d(36,-20),Math.toRadians(90))
+                        .splineToConstantHeading(new Vector2d(46,-7),Math.toRadians(90))
+                        .setReversed(true)
+                        .lineToY(-61)
+                        .waitSeconds(1)
+                        .splineToConstantHeading(new Vector2d(47,-20),Math.toRadians(90))
+                        .splineToConstantHeading(new Vector2d(54,-7),Math.toRadians(90))
+                        .setReversed(true)
+                        .lineToY(-59)
+                        .waitSeconds(1)
+                        .splineToConstantHeading(new Vector2d(55,-20),Math.toRadians(90))
+                        .splineToConstantHeading(new Vector2d(62,-7),Math.toRadians(90))
+                        .lineToY(-50)
                         .build());
         
 
@@ -562,12 +445,12 @@ public class TEST_Auto_Blue_1 extends LinearOpMode {
             telemetry.addData("SampleDistance: ", ColorSensor_DistanceSensor.getDistance(DistanceUnit.INCH));
             telemetry.update();
 
-            if (ColorSensor_DistanceSensor.getDistance(DistanceUnit.INCH) > 1.75) {
-                return true;
-            } else {
+            if (timer.seconds() >= 1) {
                 return false;
-            }
-            //return false;
+            } else if (ColorSensor_DistanceSensor.getDistance(DistanceUnit.INCH) > 1.75) {
+                return true;
+            } else
+                return false;
         }
     }
 
@@ -705,10 +588,10 @@ public class TEST_Auto_Blue_1 extends LinearOpMode {
 
             strafe = Math.min(Math.max(tX*kPStrafe,-speedMax),speedMax);
 
-            powerLF = -strafe;
-            powerRF = strafe;
-            powerLR = strafe;
-            powerRR = -strafe;
+            powerLF = strafe;
+            powerRF = -strafe;
+            powerLR = -strafe;
+            powerRR = strafe;
 
             powerMax = JavaUtil.maxOfList(JavaUtil.createListWith(Math.abs(powerLF), Math.abs(powerRF), Math.abs(powerLR), Math.abs(powerRR)));
             if (powerMax > 1) {
