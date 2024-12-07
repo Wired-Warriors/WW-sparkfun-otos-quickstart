@@ -68,9 +68,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * THIS MODE IS CONFIGURED FOR WAFFLES, NOT PANCAKE
  *
  */
-@Autonomous(name="AUTO-BLUE-2", group="AUTO", preselectTeleOp = "TELEOP-BLUE")
+@Autonomous(name="AUTO-RED-2", group="AUTO", preselectTeleOp = "TELEOP-RED")
 //@Disabled
-public class AUTO_BLUE_2 extends LinearOpMode {
+public class AUTO_RED_2 extends LinearOpMode {
 
     // Declare OpMode members.
     //private ElapsedTime runtime = new ElapsedTime();

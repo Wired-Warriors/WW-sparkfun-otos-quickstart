@@ -68,9 +68,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * THIS MODE IS CONFIGURED FOR WAFFLES, NOT PANCAKE
  *
  */
-@Autonomous(name="AUTO-BLUE-2", group="AUTO", preselectTeleOp = "TELEOP-BLUE")
+@Autonomous(name="AUTO-RED-3", group="AUTO", preselectTeleOp = "TELEOP-RED")
 //@Disabled
-public class AUTO_BLUE_2 extends LinearOpMode {
+public class AUTO_RED_3 extends LinearOpMode {
 
     // Declare OpMode members.
     //private ElapsedTime runtime = new ElapsedTime();
@@ -256,8 +256,8 @@ public class AUTO_BLUE_2 extends LinearOpMode {
                         ))
                         //Observation zone park
                         .setTangent(0)
-                        .splineToLinearHeading(new Pose2d(36,-55, Math.toRadians(0)),Math.toRadians(0))
-                        .strafeTo(new Vector2d(36,-60))                        .build());
+                        .splineToLinearHeading(new Pose2d(60,-55, Math.toRadians(0)),Math.toRadians(0))
+                        .strafeTo(new Vector2d(60,-59))                        .build());
         
 
 //        distanceColorSensor = ColorSensor_DistanceSensor.getDistance(DistanceUnit.INCH);  //Distance to the sample in the intake, used to switch off intake

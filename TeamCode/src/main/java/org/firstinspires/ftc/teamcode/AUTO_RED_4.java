@@ -33,9 +33,7 @@ import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.limelightvision.LLResult;
@@ -68,9 +66,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * THIS MODE IS CONFIGURED FOR WAFFLES, NOT PANCAKE
  *
  */
-@Autonomous(name="AUTO-BLUE-2", group="AUTO", preselectTeleOp = "TELEOP-BLUE")
+@Autonomous(name="AUTO-RED-4", group="AUTO", preselectTeleOp = "TELEOP-RED")
 //@Disabled
-public class AUTO_BLUE_2 extends LinearOpMode {
+public class AUTO_RED_4 extends LinearOpMode {
 
     // Declare OpMode members.
     //private ElapsedTime runtime = new ElapsedTime();
@@ -225,39 +223,12 @@ public class AUTO_BLUE_2 extends LinearOpMode {
         //Build the actions for our AUTO mode
         Actions.runBlocking(
                 drive.actionBuilder(beginPose)
-                        //.stopAndAdd(new setWristPositionAction(Wrist, WristStore))
-                        //.splineTo(new Vector2d(63.75, 63.75), Math.PI/4)
-                        //.splineTo(new Vector2d(-51, -41.5), 90*Math.PI/180)
-                        .splineTo(new Vector2d(-54,-54), Math.toRadians(-135))
-                        // Raise to top basket and eject sample
-                        .stopAndAdd(new SequentialAction(
-                                new ParallelAction(
-                                        new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmFull,0.5, gainP,errorRateMAX),
-                                        new setWristPositionAction(Wrist, WristEject)
-                                ),
-                                new ParallelAction(
-                                        new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmFull,1.5, gainP,errorRateMAX),
-                                        new setArmExtensionAction(ArmExtender,0.75,ExtenderFull)
-                                ),
-                                //new SleepAction(0.5),
-                                new ejectSampleAction(Intake,1),
-                                new setIntakePowerAction(Intake, 0)
-                        ))
-                        //Retract to rest position and hold, then spline to next position
-                        .stopAndAdd(new SequentialAction(
-                                new ParallelAction(
-                                        new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmFull,0.75, gainP,errorRateMAX),
-                                        new setArmExtensionAction(ArmExtender,0.75,ExtenderRetract),
-                                        new setWristPositionAction(Wrist, WristIntake)
-                                ),
-                                new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmStore,1.5, gainP,errorRateMAX),
-                                new setArmPowerOffAction(ArmLift),
-                                new setIntakePowerAction(Intake, 1)
-                        ))
-                        //Observation zone park
-                        .setTangent(0)
-                        .splineToLinearHeading(new Pose2d(36,-55, Math.toRadians(0)),Math.toRadians(0))
-                        .strafeTo(new Vector2d(36,-60))                        .build());
+                        .stopAndAdd(new setWristPositionAction(Wrist, WristStore))
+                        .waitSeconds(2)
+                        //Park in Observation Zone, leave room for another bot in corner
+                        .splineTo(new Vector2d(26,-56), Math.toRadians(0))
+                        .splineTo(new Vector2d(36,-59), Math.toRadians(0))
+                        .build());
         
 
 //        distanceColorSensor = ColorSensor_DistanceSensor.getDistance(DistanceUnit.INCH);  //Distance to the sample in the intake, used to switch off intake

@@ -255,8 +255,9 @@ public class AUTO_BLUE_3 extends LinearOpMode {
                                 new setIntakePowerAction(Intake, 1)
                         ))
                         //Observation zone park
-                        .splineTo(new Vector2d(60,-59), Math.toRadians(0))
-                        .build());
+                        .setTangent(0)
+                        .splineToLinearHeading(new Pose2d(60,-55, Math.toRadians(0)),Math.toRadians(0))
+                        .strafeTo(new Vector2d(60,-59))                        .build());
         
 
 //        distanceColorSensor = ColorSensor_DistanceSensor.getDistance(DistanceUnit.INCH);  //Distance to the sample in the intake, used to switch off intake
