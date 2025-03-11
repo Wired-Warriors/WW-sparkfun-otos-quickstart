@@ -180,7 +180,8 @@ public class AUTO_BLUE_1 extends LinearOpMode {
         targetPos_Extender = currentPos_Extender;
         targetPos_Hanger = 0;
         targetPos_Wrist = 0;
-        ((DcMotorEx) ArmLift).setMotorEnable();
+//        ((DcMotorEx) ArmLift).setMotorEnable();
+        ((DcMotorEx) ArmLift).setMotorDisable();
         ((DcMotorEx) ArmExtender).setMotorEnable();
         ((DcMotorEx) ArmHangerLeft).setMotorEnable();
         ((DcMotorEx) ArmHangerRight).setMotorEnable();
@@ -207,7 +208,7 @@ public class AUTO_BLUE_1 extends LinearOpMode {
         //Set all field positions
         Pose2d waypointBasket = new Pose2d(-54.1,-54.1,Math.toRadians(-135));
         Pose2d waypointSample1 = new Pose2d(-49,-36,Math.toRadians(90));
-        Pose2d waypointSample2 = new Pose2d(-59, -36,Math.toRadians(90));
+        Pose2d waypointSample2 = new Pose2d(-59.25, -36,Math.toRadians(90));
         Vector2d waypointSample3Bypass = new Vector2d(-51,-39);
         Vector2d waypointSample3Push = new Vector2d(-61,-7);
 
@@ -220,7 +221,7 @@ public class AUTO_BLUE_1 extends LinearOpMode {
         waitForStart();
 
         if(isStopRequested()) return;
-
+        ((DcMotorEx) ArmLift).setMotorEnable();
         //targetPos = (int) (35*COUNTS_PER_DEGREE);
 
         //Build the actions for our AUTO mode

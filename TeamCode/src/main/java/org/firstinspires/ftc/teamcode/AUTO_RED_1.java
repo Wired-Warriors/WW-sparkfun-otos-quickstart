@@ -180,7 +180,7 @@ public class AUTO_RED_1 extends LinearOpMode {
         targetPos_Extender = currentPos_Extender;
         targetPos_Hanger = 0;
         targetPos_Wrist = 0;
-        ((DcMotorEx) ArmLift).setMotorEnable();
+        ((DcMotorEx) ArmLift).setMotorDisable();
         ((DcMotorEx) ArmExtender).setMotorEnable();
         ((DcMotorEx) ArmHangerLeft).setMotorEnable();
         ((DcMotorEx) ArmHangerRight).setMotorEnable();
@@ -207,7 +207,7 @@ public class AUTO_RED_1 extends LinearOpMode {
         //Set all field positions
         Pose2d waypointBasket = new Pose2d(-54.1,-54.1,Math.toRadians(-135));
         Pose2d waypointSample1 = new Pose2d(-49,-36,Math.toRadians(90));
-        Pose2d waypointSample2 = new Pose2d(-58.75, -36,Math.toRadians(90));
+        Pose2d waypointSample2 = new Pose2d(-59.25, -36,Math.toRadians(90));
         Vector2d waypointSample3Bypass = new Vector2d(-51,-39);
         Vector2d waypointSample3Push = new Vector2d(-61,-7);
 
@@ -218,7 +218,7 @@ public class AUTO_RED_1 extends LinearOpMode {
         // Wait for the game to start (driver presses START)
         ////////////////////////////////////////////////////////////////////////////////////
         waitForStart();
-
+        ((DcMotorEx) ArmLift).setMotorEnable();
         if(isStopRequested()) return;
 
         //targetPos = (int) (35*COUNTS_PER_DEGREE);
