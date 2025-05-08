@@ -207,7 +207,7 @@ public class AUTO_BLUE_1_TEST_2 extends LinearOpMode {
 
         //Set all field positions
         Pose2d waypointBasketInit = new Pose2d(-49.5,-63.44,Math.toRadians(180));
-        Pose2d waypointBasket = new Pose2d(-54.1,-54.1,Math.toRadians(-135));
+        Pose2d waypointBasket = new Pose2d(-53.0,-53.0,Math.toRadians(-135));
         Pose2d waypointSample1 = new Pose2d(-49,-36,Math.toRadians(90));
         Pose2d waypointSample2 = new Pose2d(-59.25, -36,Math.toRadians(90));
         Vector2d waypointSample3Bypass = new Vector2d(-51,-39);
@@ -247,7 +247,7 @@ public class AUTO_BLUE_1_TEST_2 extends LinearOpMode {
                                 //)        //new SleepAction(0.5),
 
                         ))
-                        .splineTo(new Vector2d(-50,-63.44), Math.toRadians(-180))
+                        .splineTo(new Vector2d(-49.125,-63.44), Math.toRadians(-180))
                         .stopAndAdd(new SequentialAction(
                                 //new SleepAction(0.5),
                                 new ejectSampleAction(Intake,1),
@@ -333,9 +333,8 @@ public class AUTO_BLUE_1_TEST_2 extends LinearOpMode {
 
                         ))
                         .setTangent(0)
-                        .splineToLinearHeading(new Pose2d(-53.6,-53.6,Math.toRadians(-135)), Math.toRadians(-135))
-                        //.splineTo(waypointBasket, -135*Math.PI/180)
-                        // Raise to top basket and eject sample
+                        //.splineToLinearHeading(new Pose2d(-53.0,-53.0,Math.toRadians(-135)), Math.toRadians(-135))
+                        .splineToLinearHeading(waypointBasket, Math.toRadians(-135))                        // Raise to top basket and eject sample
                         .stopAndAdd(new SequentialAction(
                                 new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmFull,1.75, gainP,errorRateMAX),
                                 new ParallelAction(
