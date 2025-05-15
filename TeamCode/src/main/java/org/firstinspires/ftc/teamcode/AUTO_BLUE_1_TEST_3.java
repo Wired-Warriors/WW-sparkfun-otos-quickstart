@@ -68,13 +68,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * THIS MODE IS CONFIGURED FOR WAFFLES, NOT PANCAKE
  *
  */
-@Autonomous(name="AUTO-BLUE-1-TEST", group="AUTO", preselectTeleOp = "TELEOP-BLUE")
+@Autonomous(name="AUTO-BLUE-1-TEST-3", group="AUTO", preselectTeleOp = "TELEOP-BLUE")
 //@Autonomous(name="AUTO-BLUE-1", group="AUTO", preselectTeleOp = "TELEOP-BLUE (Blocks to Java)")
 //@Disabled
-public class AUTO_BLUE_1_TEST extends LinearOpMode {
+public class AUTO_BLUE_1_TEST_3 extends LinearOpMode {
 
     // Declare OpMode members.
-    //private ElapsedTime runtime = new ElapsedTime();
     private Limelight3A limelight;
     private SparkFunOTOS otos;
     private DcMotor ArmLift;
@@ -83,8 +82,6 @@ public class AUTO_BLUE_1_TEST extends LinearOpMode {
     private DcMotor ArmHangerRight;
     private CRServo Intake;
     private Servo Wrist;
-//    private LED LED_Intake;
-//    private ColorSensor ColorSensor_ColorSensor;
     private DistanceSensor ColorSensor_DistanceSensor;
     private DcMotor leftFront;
     private DcMotor leftBack;
@@ -97,27 +94,13 @@ public class AUTO_BLUE_1_TEST extends LinearOpMode {
     public String colorAlliance = "BLUE"; //Enter either BLUE or RED alliance, this will chance all further color-related settings
     public double txLimelight;
     public double tyLimelight;
-    int gainColorSensor;
-    // TODO: Enter the type for variable named colorReject
-    String colorReject;
-    ElapsedTime PID_Timer;
-    String colorSample;
-    int integral;
     int currentPos;
-    int errorPosLast;
     int errorPos;
-    int myColorData;
-    double distanceColorSensor;
     double motorPower;
-    int countColorCompare;
-    boolean statusColorCompare;
     double errorRateMAX;
     double gainP;
     double motorPowerMAX;
-    double powerIntake = 0;
     public int targetPos;
-    //int targetPos;
-    double maxWheelPower;
     double COUNTS_PER_DEGREE;
     int COUNTS_PER_MOTOR_REV;
     int GEAR_REDUCTION;
@@ -127,7 +110,6 @@ public class AUTO_BLUE_1_TEST extends LinearOpMode {
     int targetPos_Extender;
     int targetPos_Wrist;
     int targetPos_Hanger;
-    double velocityArmLift;
     int HangerUp;
     int HangerZero;
     double WristUp;
@@ -143,7 +125,6 @@ public class AUTO_BLUE_1_TEST extends LinearOpMode {
     // X and Y in INCHES from the center of the field, heading in RADIANS (or convert DEGREES to
     // RADIANS by multiplying the value in DEGREES by Math.PI/180
     Pose2d beginPose = new Pose2d(-32.25, -63.44, 180*Math.PI/180);
-    //Pose2d beginPose = new Pose2d(-16.5, -62.69, 90*Math.PI/180);
     @Override
     public void runOpMode() {
 
@@ -154,8 +135,6 @@ public class AUTO_BLUE_1_TEST extends LinearOpMode {
         ArmHangerRight = hardwareMap.get(DcMotor.class, "Arm Hanger Right");
         Intake = hardwareMap.get(CRServo.class, "Intake");
         Wrist = hardwareMap.get(Servo.class, "Wrist");
-//        LED_Intake = hardwareMap.get(LED.class, "LED_Intake");
-//        ColorSensor_ColorSensor = hardwareMap.get(ColorSensor.class, "Color Sensor");
         ColorSensor_DistanceSensor = hardwareMap.get(DistanceSensor.class, "Color Sensor");
         otos = hardwareMap.get(SparkFunOTOS.class, "otos");
 
@@ -168,7 +147,6 @@ public class AUTO_BLUE_1_TEST extends LinearOpMode {
         COUNTS_PER_DEGREE = (double) COUNTS_PER_GEAR_REV / 360;
         currentPos_Extender = ArmExtender.getCurrentPosition();
         intakeTimer = new ElapsedTime();
-//        VerifyColor_Initializations(); // Initialize Color Sensor
 
         targetPos = 0;           // Target arm position, in absolute position - encoder ticks
         targetPos_Extender = 0;  // Target arm position, in absolute position - encoder ticks
@@ -180,7 +158,6 @@ public class AUTO_BLUE_1_TEST extends LinearOpMode {
         targetPos_Extender = currentPos_Extender;
         targetPos_Hanger = 0;
         targetPos_Wrist = 0;
-//        ((DcMotorEx) ArmLift).setMotorEnable();
         ((DcMotorEx) ArmLift).setMotorDisable();
         ((DcMotorEx) ArmExtender).setMotorEnable();
         ((DcMotorEx) ArmHangerLeft).setMotorEnable();
@@ -206,12 +183,12 @@ public class AUTO_BLUE_1_TEST extends LinearOpMode {
         ArmStore = 0;
 
         //Set all field positions
-        Pose2d waypointBasketInit = new Pose2d(-49.5,-63.44,Math.toRadians(180));
-        Pose2d waypointBasket = new Pose2d(-54.1,-54.1,Math.toRadians(-135));
+        Vector2d waypointBasketInit = new Vector2d(-49.125,-63.44);
+        Pose2d waypointBasket = new Pose2d(-53.0,-53.0,Math.toRadians(-135));
         Pose2d waypointSample1 = new Pose2d(-49,-36,Math.toRadians(90));
         Pose2d waypointSample2 = new Pose2d(-59.25, -36,Math.toRadians(90));
-        Vector2d waypointSample3Bypass = new Vector2d(-51,-39);
-        Vector2d waypointSample3Push = new Vector2d(-61,-7);
+        Pose2d waypointSample3 = new Pose2d(-62.5, -15.5,Math.toRadians(-90));
+
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -228,49 +205,42 @@ public class AUTO_BLUE_1_TEST extends LinearOpMode {
         //Build the actions for our AUTO mode
         Actions.runBlocking(
                 drive.actionBuilder(beginPose)
-                        //.stopAndAdd(new setWristPositionAction(Wrist, 0.85))
-                        //.splineTo(new Vector2d(63.75, 63.75), Math.PI/4)
-                        //.splineTo(new Vector2d(-51, -41.5), 90*Math.PI/180)
-                        ////.splineTo(new Vector2d(-54,-54), Math.toRadians(-135))
 
-                        // Raise to top basket and eject sample
+                        // Raise arm and extend simultaneously to top basket
+                        // Raising and extending at the same time is risky, but fast if there is space
                         .stopAndAdd(new SequentialAction(
                                 new ParallelAction(
                                         new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmFull,1.5, gainP,errorRateMAX),
-                                        new setArmExtensionAction(ArmExtender,0.75,ExtenderFull),
-                                        new setWristPositionAction(Wrist, WristEject)
-                                )//,
-                                //new ParallelAction(
-                                       // new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmFull,1.2 , gainP,errorRateMAX),
-                                        //new setArmExtensionAction(ArmExtender,0.75,ExtenderFull)
-                                //)        //new SleepAction(0.5),
-
+                                        new setArmExtensionAction(ArmExtender,0.75,ExtenderFull)
+                                        //new setWristPositionAction(Wrist, WristEject)
+                                ),
+                                new setWristPositionAction(Wrist, WristEject)
                         ))
-                        .splineTo(new Vector2d(-50,-63.44), Math.toRadians(-180))
+                        // Drive forward to the basket and eject sample
+                        //.splineTo(new Vector2d(-49.125,-63.44), Math.toRadians(-180))
+                        .splineTo(waypointBasketInit, Math.toRadians(-180))
                         .stopAndAdd(new SequentialAction(
-                                //new SleepAction(0.5),
                                 new ejectSampleAction(Intake,1),
                                 new setIntakePowerAction(Intake, 0)
                         ))
-                        //Retract to rest position and hold, then spline to next position
+                        //Retract to rest position and hold
                         .stopAndAdd(new SequentialAction(
                                 new ParallelAction(
                                         new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmFull,0.75, gainP,errorRateMAX),
-                                        new setArmExtensionAction(ArmExtender,0.75,ExtenderRetract),
-                                        new setWristPositionAction(Wrist, WristIntake)
+                                        new setArmExtensionAction(ArmExtender,0.75,ExtenderRetract)
                                 ),
                                 new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmStore,1.5, gainP,errorRateMAX),
                                 new setArmPowerOffAction(ArmLift),
-                                new setIntakePowerAction(Intake, 1)
+                                new setIntakePowerAction(Intake, 1),
+                                new setWristPositionAction(Wrist, WristIntake)
                         ))
+
+                        // Drive to the first sample intake position (the sample closest to the submersible)
                         .setTangent(0)
                         .splineToLinearHeading(waypointSample1,90*Math.PI/180)
-                        //.splineTo(waypointSample2, 90*Math.PI/180)
-                        //Strafe to line up on sample
-                        //.stopAndAdd(new strafeToTargetAction(2,0.18,0.1, 1))
-                        //Adjust to pick up sample
+
+                        //Extend arm to pick up sample from floor
                         .stopAndAdd(new SequentialAction(
-                                //new setWristPositionAction(Wrist,0.5),
                                 new ParallelAction(
                                         new setArmExtensionAction(ArmExtender,0.5,ExtenderIntake),
                                         new intakeSampleAction(Intake,2)
@@ -281,12 +251,12 @@ public class AUTO_BLUE_1_TEST extends LinearOpMode {
                                         new setArmExtensionAction(ArmExtender,0.5,ExtenderRetract),
                                         new setWristPositionAction(Wrist,WristEject)
                                 )
-
                         ))
+
+                        // Drive to the basket
                         .setTangent(0)
                         .splineToLinearHeading(waypointBasket, Math.toRadians(-135))
-                        //.splineTo(new Vector2d(-38, -48), -90*Math.PI/180)
-                        //.splineTo(waypointBasket, -135*Math.PI/180)
+
                         // Raise to top basket and eject sample
                         .stopAndAdd(new SequentialAction(
                                 new ParallelAction(
@@ -296,27 +266,27 @@ public class AUTO_BLUE_1_TEST extends LinearOpMode {
                                         new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmFull,1.1, gainP,errorRateMAX),
                                         new setArmExtensionAction(ArmExtender,0.75,ExtenderFull)
                                 ),
-                                //new SleepAction(0.5),
                                 new ejectSampleAction(Intake,1),
                                 new setIntakePowerAction(Intake, 0)
                         ))
-                        //Retract to rest position and hold, then spline to next position
+
+                        //Retract to rest position and hold
                         .stopAndAdd(new SequentialAction(
                                 new ParallelAction(
                                         new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmFull,0.75, gainP,errorRateMAX),
-                                        new setArmExtensionAction(ArmExtender,0.75,ExtenderRetract),
-                                        new setWristPositionAction(Wrist, WristIntake)
+                                        new setArmExtensionAction(ArmExtender,0.75,ExtenderRetract)
                                 ),
                                 new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmStore,1.5, gainP,errorRateMAX),
                                 new setArmPowerOffAction(ArmLift),
-                                new setIntakePowerAction(Intake, 1)
+                                new setIntakePowerAction(Intake, 1),
+                                new setWristPositionAction(Wrist, WristIntake)
                         ))
+
+                        // Drive to the second sample intake position (the middle of the three yellow samples)
                         .setTangent(0)
                         .splineToLinearHeading(waypointSample2, 90*Math.PI/180)
-                        //.splineTo(waypointSample1,90*Math.PI/180)
-                        //Strafe to line up on sample
-                        //.stopAndAdd(new strafeToTargetAction(2,0.18,0.1, 1))
-                        //Adjust to pick up sample
+
+                        //Extend arm to pick up sample from floor
                         .stopAndAdd(new SequentialAction(
                                 new ParallelAction(
                                         new setArmExtensionAction(ArmExtender,0.5,ExtenderIntake),
@@ -330,59 +300,46 @@ public class AUTO_BLUE_1_TEST extends LinearOpMode {
                                 )
 
                         ))
+                        // Drive to the basket
                         .setTangent(0)
-                        .splineToLinearHeading(new Pose2d(-53.6,-53.6,Math.toRadians(-135)), Math.toRadians(-135))
-                        //.splineTo(waypointBasket, -135*Math.PI/180)
+                        // It might be necessary to adjust for accumulated position errors with the OTOS by manually setting the basket stop position further away than the first time.  Use the code in the next line to do that.
+                        //.splineToLinearHeading(new Pose2d(-53.0,-53.0,Math.toRadians(-135)), Math.toRadians(-135))
+                        .splineToLinearHeading(waypointBasket, Math.toRadians(-135))
+
                         // Raise to top basket and eject sample
                         .stopAndAdd(new SequentialAction(
                                 new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmFull,1.75, gainP,errorRateMAX),
                                 new ParallelAction(
                                         new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmFull,1.0, gainP,errorRateMAX),
                                         new setArmExtensionAction(ArmExtender,0.75,ExtenderFull)
-                                        //new setHangerPositionAction(ArmHangerLeft, ArmHangerRight, HangerUp,2.25)
                                  ),
-                                //new SleepAction(0.5),
                                 new ejectSampleAction(Intake,1),
                                 new setIntakePowerAction(Intake, 0)
                         ))
 
-                        // Drive to push last sample into net zone
-                        //.splineTo(waypointSample3Bypass,90*Math.PI/180)
-                        //.splineTo(waypointSample3Push,90*Math.PI/180)
-                        //.lineToY(-55)
-
-                        // OFF FOR NOW .setReversed(false)
-                        // OFF FOR NOW .splineTo(new Vector2d(-21,-11),0*Math.PI/180)
-                        //Retract to storage position and raise hangers
+                        //Retract to storage position
                         .stopAndAdd(new SequentialAction(
                                 new ParallelAction(
                                         new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmFull,0.75, gainP,errorRateMAX),
-                                        new setArmExtensionAction(ArmExtender,0.75,ExtenderRetract),
-                                        new setWristPositionAction(Wrist, WristStore)
+                                        new setArmExtensionAction(ArmExtender,0.75,ExtenderRetract)
                                 ),
                                 new proportionalController(ArmLift, COUNTS_PER_DEGREE * ArmStore,1.5, gainP,errorRateMAX),
-                                new setArmPowerOffAction(ArmLift)
+                                new setArmPowerOffAction(ArmLift),
+                                new setWristPositionAction(Wrist, WristStore)
                         ))
-                        .setReversed(true)
-                        .splineToLinearHeading(new Pose2d(-62.5,-15.5,Math.toRadians(-90)),Math.toRadians(-90))
-                        .setReversed(false)
-                        .lineToY(-43.5)
 
-//                        .splineTo(new Vector2d(-51, -38), 90*Math.PI/180)
-//                        .waitSeconds(2)
-//                        .splineTo(new Vector2d(-54, -54), -135*Math.PI/180)
-//                        .waitSeconds(2)
-//                        .splineTo(new Vector2d(-60.5, -38), 90*Math.PI/180)
-//                        .waitSeconds(2)
-//                        .splineTo(new Vector2d(-54, -54), -135*Math.PI/180)
-//                        .waitSeconds(2)
-//                        .splineTo(new Vector2d(-51,-38),90*Math.PI/180)
-//                        .splineTo(new Vector2d(-60.5,-7),90*Math.PI/180)
-//                        .lineToY(-55)
+                        // Drive in reverse around the last sample (closest to the wall) and position to push it into the net zone
+                        .setReversed(true)
+                        //.splineToLinearHeading(new Pose2d(-62.5,-15.5,Math.toRadians(-90)),Math.toRadians(-90))
+                        .splineToLinearHeading(waypointSample3,Math.toRadians(-90))
+                        .setReversed(false)
+
+                        // Push the sample into the net zone
+                        .lineToY(-44)
+
                         .build());
         
 
-//        distanceColorSensor = ColorSensor_DistanceSensor.getDistance(DistanceUnit.INCH);  //Distance to the sample in the intake, used to switch off intake
 
         SparkFunOTOS.Pose2D pos = otos.getPosition(); //Read OTOS Pose for telemetry
 
@@ -409,26 +366,6 @@ public class AUTO_BLUE_1_TEST extends LinearOpMode {
     ///////////////////////////////////////////////////
     //PUBLIC CLASSES FOR ROADRUNNER ACTION DEFINITIONS
     //////////////////////////////////////////////////
-
-//    //Set the target arm position (assumes P-Controller is running in the background)
-//    public class setArmPostionAction implements Action {
-//        DcMotor ArmLift;
-//        double targetPos;
-//        double COUNTS_PER_DEGREE;
-//
-//        public setArmPostionAction(DcMotor ArmLift,double COUNTS_PER_DEGREE, double targetPos) {
-//            this.ArmLift = ArmLift;
-//            this.targetPos = targetPos;
-//            this.COUNTS_PER_DEGREE = COUNTS_PER_DEGREE;
-//        }
-//
-//        @Override
-//        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-//            targetPos = (int) (COUNTS_PER_DEGREE * 100);
-//
-//            return false;
-//        }
-//    }
 
   // Extend the arm to a given position
     public class setArmExtensionAction implements Action {
@@ -460,12 +397,6 @@ public class AUTO_BLUE_1_TEST extends LinearOpMode {
             } else {
                 return false;
             }
-
-//            if(ArmExtender.getCurrentPosition() > targetPos_Extender){
-//                return true;
-//            } else {
-//                return false;
-//            }
         }
     }
 
@@ -502,12 +433,6 @@ public class AUTO_BLUE_1_TEST extends LinearOpMode {
             } else {
                 return false;
             }
-
-//            if(ArmHangerRight.isBusy()){
-//                return true;
-//            } else {
-//                return false;
-//            }
         }
     }
 
