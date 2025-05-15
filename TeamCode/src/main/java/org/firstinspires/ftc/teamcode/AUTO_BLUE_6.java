@@ -230,16 +230,16 @@ public class AUTO_BLUE_6 extends LinearOpMode {
                         .splineToConstantHeading(new Vector2d(36,-20),Math.toRadians(90))
                         .splineToConstantHeading(new Vector2d(46,-7),Math.toRadians(90))
                         .setReversed(true)
-                        .lineToY(-61)
-                        .waitSeconds(1)
+                        .lineToY(-57)
+                        .waitSeconds(0.5)
                         .splineToConstantHeading(new Vector2d(47,-20),Math.toRadians(90))
                         .splineToConstantHeading(new Vector2d(54,-7),Math.toRadians(90))
                         .setReversed(true)
-                        .lineToY(-59)
-                        .waitSeconds(1)
+                        .lineToY(-55)
+                        .waitSeconds(0.5)
                         .splineToConstantHeading(new Vector2d(55,-20),Math.toRadians(90))
                         .splineToConstantHeading(new Vector2d(62,-7),Math.toRadians(90))
-                        .lineToY(-50)
+                        .lineToY(-55)
                         .build());
         
 

@@ -229,7 +229,7 @@ public class AUTO_BLUE_5 extends LinearOpMode {
                         .waitSeconds(2)
                         //Park in Observation Zone Corner
                         .splineTo(new Vector2d(26,-56), Math.toRadians(0))
-                        .splineTo(new Vector2d(60,-59), Math.toRadians(0))
+                        .splineTo(new Vector2d(58,-59), Math.toRadians(0))
                         .build());
         
 
