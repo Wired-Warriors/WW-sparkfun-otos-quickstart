@@ -179,7 +179,7 @@ public class AUTO_BLUE_5 extends LinearOpMode {
         targetPos_Extender = currentPos_Extender;
         targetPos_Hanger = 0;
         targetPos_Wrist = 0;
-        ((DcMotorEx) ArmLift).setMotorEnable();
+        ((DcMotorEx) ArmLift).setMotorDisable();
         ((DcMotorEx) ArmExtender).setMotorEnable();
         ((DcMotorEx) ArmHangerLeft).setMotorEnable();
         ((DcMotorEx) ArmHangerRight).setMotorEnable();
